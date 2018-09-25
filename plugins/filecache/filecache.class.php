@@ -1,5 +1,5 @@
 <?php
-namespace rengine;
+namespace filecache;
 class filecache{
     public $cacheDir, $cacheExt = 'fcache', $cacheLifetime = 1800;
     function __construct(){

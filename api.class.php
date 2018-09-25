@@ -1,18 +1,19 @@
 <?php
 namespace pixeless;
 require_once('defines.php');
+require_once('plugins/filecache/filecache.class.php');
 
 class api{
     private $endpoint, $user, $pass;
-    private $filecache;
+    private $filecache, $cacheLifetime = 3600;
     private $errorFunc, $lastError = Array('code' => 0, 'msg' => null);
     public $enableCache = true, $internalErrors = false;
     function __construct($endpoint, $user, $password){
         $this->endpoint = $endpoint;
         $this->user = $user;
         $this->pass = md5($password);
-        $this->filecache = new filecache();
-        $this->filecache->cacheDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'rengine'.DIRECTORY_SEPARATOR;
+        $this->filecache = new \filecache\filecache();
+        $this->filecache->cacheDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pixeless-dev'.DIRECTORY_SEPARATOR;
         return true;
     }
     function setCacheDir($dir){
@@ -23,44 +24,18 @@ class api{
         $this->filecache->cacheDir = $dir;
         return true;
     }
-    function app($app){
-        return $this->application($app);
-    }
-    function application($app){
-        $this->appId = $app;
-        $this->modId = null;
-        $this->extId = null;
-        return $this;
-    }
-    function mod($mod){
-        return $this->module($mod);
-    }
-    function module($mod){
-        $this->modId = $mod;
-        $this->extId = null;
-        return $this;
-    }
-    function ext($ext){
-        return $this->extension($ext);
-    }
-    function extension($ext){
-        $this->extId = $ext;
-        return $this;
-    }
-    function __call($func, $params){
+    function getVars($GET = false, $POST = false){
         $retorno = false;
+        $params = Array(
+            'GET' => $GET,
+            'POST' => $POST,
+        );
         // REALIZAR CONSULTA NO CACHE
-        $cacheHash = '';
-        $cacheHash .= ($this->appId)? $this->appId.'-' : '';
-        $cacheHash .= ($this->modId)? $this->modId.'-' : '';
-        $cacheHash .= ($this->extId)? $this->extId.'-' : '';
-        $cacheHash .= $func.'-'.md5($this->endpoint.json_encode($params));
+        $cacheHash = $this->user.'-'.md5($this->endpoint.json_encode($params));
         if($this->enableCache && $retorno = $this->filecache->cache_get($cacheHash, $cacheChangeTime)){
-            if(isset($retorno['cache_lifetime'])){
-                if((time() - $cacheChangeTime) > $retorno['cache_lifetime']){
-                    $this->filecache->cache_unset($cacheHash);
-                    $retorno = false;
-                }
+            if((time() - $cacheChangeTime) > $this->cacheLifetime){
+                $this->filecache->cache_unset($cacheHash);
+                $retorno = false;
             }else{
                 $retorno = false;
             }
@@ -72,15 +47,11 @@ class api{
                     $params[$key] = @json_encode($value);
                 }
             }
-            $params['app'] = $this->appId;
-            $params['mod'] = $this->modId;
-            $params['ext'] = $this->extId;
-            $params['func'] = $func;
             if($retorno = $this->request($this->endpoint, $params, $httpCode)){
                 if($retornoDecoded = json_decode($retorno, true)){
                     $retorno = $retornoDecoded;
                     // SALVAR CONSULTA EM CACHE
-                    if($this->enableCache && isset($retorno['cache_lifetime']) && $retorno['cache_lifetime']){
+                    if($this->enableCache){
                         $this->filecache->cache_set($cacheHash, $retorno);
                     }
                 }else{
