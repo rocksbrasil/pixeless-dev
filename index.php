@@ -19,6 +19,10 @@ $smarty->registerPlugin('modifier', 'html2Text', 'convert_html_to_text');
 $smarty->template_dir = 'theme_content/templates/';
 $smarty->compile_dir = 'theme_content/templates/compiled/';
 
+// reinstanciar variáveis locais
+$_TEMPLATE['BASE_DIR'] = getExistentUrlPath();
+$_TEMPLATE['THEME_DIR'] = getExistentUrlPath().'theme_content/';
+
 // assimilar variáveis do template
 if($_TEMPLATE){
     foreach ($_TEMPLATE as $key => $value) {
