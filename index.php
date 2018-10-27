@@ -36,6 +36,7 @@ if($_PAGE && file_exists('theme_content/templates/'.$_PAGE.'.html')){
 }else{
     header('HTTP/1.0 404 Not Found');
     if(file_exists('theme_content/templates/404.html')){
+        $smarty->assign('PAGE', '404');
         $smarty->display('theme_content/templates/404.html');
     }else{
         echo "<h1>404 Not Found</h1>";
