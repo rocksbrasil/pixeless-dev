@@ -13,11 +13,12 @@ $_PAGE = (isset($_TEMPLATE['PAGE']))? $_TEMPLATE['PAGE'] : 'home';
 
 // INSTANCIAR SMARTY
 $smarty = new \Smarty();
+$smarty->template_dir = 'theme_content/templates/';
+$smarty->compile_dir = 'theme_content/templates/compiled/';
 $smarty->registerPlugin('modifier', 'seoText', 'generateSeoName');
 $smarty->registerPlugin('modifier', 'removeQueryString', 'removeQueryString');
 $smarty->registerPlugin('modifier', 'html2Text', 'convert_html_to_text');
-$smarty->template_dir = 'theme_content/templates/';
-$smarty->compile_dir = 'theme_content/templates/compiled/';
+$smarty->registerPlugin('block', 'text', '\pixeless\textBlock');
 
 // reinstanciar variáveis locais
 $_TEMPLATE['BASE_DIR'] = getExistentUrlPath();
@@ -43,3 +44,7 @@ if($_PAGE && file_exists('theme_content/templates/'.$_PAGE.'.html')){
     }
 }
 
+// FUNÇÃO DE TROCA DE TEXTO DOS TEMPLATES
+function textBlock($params, $content, $smarty, &$repeat){
+    return $content;
+}
