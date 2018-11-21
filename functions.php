@@ -20,11 +20,11 @@ function getExistentUrlPath() {
     }
     $serverPath = explode($folderDivisor, $serverPath);
     if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-        $realPath = 'HTTPS://';
+        $realPath = 'https://';
     }elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
-        $realPath = 'HTTPS://';
+        $realPath = 'https://';
     }else {
-        $realPath = 'HTTP://';
+        $realPath = 'http://';
     }
     $realPath = $realPath . $_SERVER['HTTP_HOST'];
 
